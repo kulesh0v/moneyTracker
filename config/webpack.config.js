@@ -9,7 +9,7 @@ const plugins = [
 ];
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: "./src/client/static/index.js",
   plugins: plugins,
   output: {
@@ -32,5 +32,4 @@ module.exports = {
       },
     ]
   },
-  watch: true
 };

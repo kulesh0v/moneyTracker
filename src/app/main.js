@@ -197,7 +197,7 @@ app.on('ready', () => {
       nodeIntegrationInWorker: true,
     },
   });
-  //Menu.setApplicationMenu(null);
-  win.webContents.openDevTools();
+  Menu.setApplicationMenu(null);
+  // win.webContents.openDevTools();
   win.loadFile('../client/dist/index.html');
 })
