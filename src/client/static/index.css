@@ -1,0 +1,29 @@
+.clear-button {
+  padding: 0;
+  border: none;
+  font: inherit;
+  color: inherit;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.sort-buttons {
+  margin-left: 6px;
+}
+
+.func-button {
+  margin-left: 6px;
+}
+
+.editor-elem {
+  margin-bottom: 12pxs;
+}
+
+.categories-list {
+  list-style: none;
+  padding-left: 12px;
+    /* overflow: hidden;
+  height: 200px;
+  overflow-y: scroll;
+  */
+}
