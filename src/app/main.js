@@ -7,34 +7,34 @@ const costsPath = path.join(__dirname, './costs.json');
 const profitsPath = path.join(__dirname, './profits.json');
 const categoriesPath = path.join(__dirname, './categories.json');
 
-ipcMain.handle('getCosts', async (event, filter) => {
+const getCosts = async (filter) => {
   return JSON.parse(await fsPromises.readFile(costsPath))
     .filter(cost => {
-      if (filter.searchText) {
+      if (filter && filter.searchText) {
         return cost.name.includes(filter.searchText);
       }
       return true;
     })
     .filter(cost => {
-      if (Array.isArray(filter.selectedCategories) && filter.selectedCategories.length) {
+      if (filter && Array.isArray(filter.selectedCategories) && filter.selectedCategories.length) {
         return filter.selectedCategories.includes(cost.category);
       }
       return true;
     })
     .filter(cost => {
-      if (filter.dateFrom) {
+      if (filter && filter.dateFrom) {
         return filter.dateFrom < cost.date;
       }
       return true;
     })
     .filter(cost => {
-      if (filter.dateTo) {
+      if (filter && filter.dateTo) {
         return filter.dateTo > cost.date;
       }
       return true;
     })
     .sort((cost1, cost2) => {
-      if (filter.sortType) {
+      if (filter && filter.sortType) {
         if (filter.sortType === 'priceUp') {
           return cost1.price - cost2.price;
         }
@@ -48,9 +48,13 @@ ipcMain.handle('getCosts', async (event, filter) => {
           return new Date(cost2.date) - new Date(cost1.date);
         }
       } else {
-        return cost2.key - cost1.key;
+        return new Date(cost2.date) - new Date(cost1.date);
       }
     });
+}
+
+ipcMain.handle('getCosts', async (event, filter) => {
+  return getCosts(filter);
 });
 
 ipcMain.handle('getCategories', async () => {
@@ -59,7 +63,7 @@ ipcMain.handle('getCategories', async () => {
 
 ipcMain.handle('addCost', async (event, cost) => {
   try {
-    const costsList = JSON.parse(await fsPromises.readFile(costsPath));
+    const costsList = await getCosts();
     if (!cost.date) {
       cost.date = new Date();
     }
@@ -75,7 +79,7 @@ ipcMain.handle('addCost', async (event, cost) => {
 
 ipcMain.handle('editCost', async (event, cost) => {
   try {
-    const costsList = JSON.parse(await fsPromises.readFile(costsPath));
+    const costsList = await getCosts();
     if (!cost.date) {
       cost.date = new Date();
     }
@@ -104,7 +108,7 @@ ipcMain.handle('deleteCost', async (event, cost) => {
 
 ipcMain.handle('addProfit', async (event, profit) => {
   try {
-    const profitsList = JSON.parse(await fsPromises.readFile(profitsPath));
+    const profitsList = await getProfits();
     if (!profit.date) {
       profit.date = new Date();
     }
@@ -120,7 +124,7 @@ ipcMain.handle('addProfit', async (event, profit) => {
 
 ipcMain.handle('editProfit', async (event, profit) => {
   try {
-    const profitsList = JSON.parse(await fsPromises.readFile(profitsPath));
+    const profitsList = await getProfits();
     if (!profit.date) {
       profit.date = new Date();
     }
@@ -136,7 +140,7 @@ ipcMain.handle('editProfit', async (event, profit) => {
 
 ipcMain.handle('deleteProfit', async (event, profit) => {
   try {
-    const profitsList = JSON.parse(await fsPromises.readFile(profitsPath));
+    const profitsList = await getProfits();
     const index = profitsList.findIndex(oldProfit => oldProfit.key === profit.key);
     profitsList.splice(index, 1);
     await fsPromises.writeFile(profitsPath, JSON.stringify(profitsList));
@@ -147,29 +151,28 @@ ipcMain.handle('deleteProfit', async (event, profit) => {
   }
 });
 
-
-ipcMain.handle('getProfits', async (event, filter) => {
+const getProfits = async (filter) => {
   return JSON.parse(await fsPromises.readFile(profitsPath))
     .filter(profit => {
-      if (filter.searchText) {
+      if (filter && filter.searchText) {
         return profit.name.includes(filter.searchText);
       }
       return true;
     })
     .filter(profit => {
-      if (filter.dateFrom) {
+      if (filter && filter.dateFrom) {
         return filter.dateFrom < profit.date;
       }
       return true;
     })
     .filter(profit => {
-      if (filter.dateTo) {
+      if (filter && filter.dateTo) {
         return filter.dateTo > profit.date;
       }
       return true;
     })
     .sort((profit1, profit2) => {
-      if (filter.sortType) {
+      if (filter && filter.sortType) {
         if (filter.sortType === 'priceUp') {
           return profit1.price - profit2.price;
         }
@@ -183,9 +186,38 @@ ipcMain.handle('getProfits', async (event, filter) => {
           return new Date(profit2.date) - new Date(profit1.date);
         }
       } else {
-        return profit2.key - profit1.key;
+        return new Date(profit2.date) - new Date(profit1.date);
       }
     });
+}
+
+ipcMain.handle('getProfits', async (event, filter) => {
+  return getProfits(filter);
+});
+
+ipcMain.handle('getDiagramDatas', async (event, month) => {
+  try {
+    const costs = JSON.parse(await fsPromises.readFile(costsPath));
+    const result = [];
+    costs.filter(cost => (new Date(cost.date).getMonth()) === month) // FIX: add year filter 
+      .forEach(cost => {
+        if (!result.some(category => category.label === cost.category)) {
+          result.push({ label: cost.category });
+        }
+      });
+    return result.map(category => {
+      category.value = 0;
+      costs.filter(cost => cost.category === category.label)
+        .forEach(cost => {
+          category.value += cost.price
+        });
+      return category;
+    });
+  }
+  catch (e) {
+    console.log(e)
+    throw e;
+  }
 });
 
 app.on('ready', () => {

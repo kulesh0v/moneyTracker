@@ -4,7 +4,7 @@ import { Table, Icon } from 'antd';
 
 const dateFormat = 'DD.MM.YYYY';
 
-const CostsList = ({ costs, setSortType }) => {
+const CostsList = ({ costs, setSortType, balance }) => {
   const columns = [
     {
       title: () => (
@@ -50,9 +50,10 @@ const CostsList = ({ costs, setSortType }) => {
       ),
       dataIndex: 'price',
       key: 'price',
+      render: (value) => `$${value}`,
     },
     {
-      title: '',
+      title: '$' + balance,
       key: 'actions',
       dataIndex: 'actions',
       render: actions => {

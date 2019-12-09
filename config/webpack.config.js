@@ -1,7 +1,6 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-
 const plugins = [
   new CopyWebpackPlugin([
     path.resolve(__dirname, '../src/client/static/index.html')
@@ -17,6 +16,7 @@ module.exports = {
     path: path.resolve(__dirname, '../src/client/dist'),
     publicPath: '/'
   },
+  // watch: true,
   module: {
     rules: [
       {

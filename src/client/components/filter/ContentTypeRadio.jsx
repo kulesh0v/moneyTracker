@@ -5,7 +5,7 @@ const ContentTypeRadio = ({ contentType, setContentType, contentTypes }) => {
     <Radio.Group value={contentType} onChange={(e) => { setContentType(e.target.value) }}>
       {
         contentTypes.map(type => (
-          <Radio value={type.value}>{type.label}</Radio>
+          <Radio key={type.value} value={type.value}>{type.label}</Radio>
         ))
       }
     </Radio.Group>

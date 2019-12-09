@@ -9,19 +9,19 @@ const CostModal = ({ visible, type, cost, costCategories, onOk, onCancel }) => {
   const [name, setName] = useState();
   const [category, setCategory] = useState();
   const [price, setPrice] = useState(0);
-  const [date, setDate] = useState(new Date);
+  const [date, setDate] = useState(new Date());
 
   useEffect(() => {
     if (cost) {
       setName(cost.name);
       setCategory(cost.category);
       setPrice(cost.price);
-      setDate(cost.date);
+      setDate(new Date(cost.date));
     } else {
       setName();
       setCategory();
       setPrice(0);
-      setDate(new Date);
+      setDate(new Date());
     }
   }, [cost]);
 
@@ -31,6 +31,7 @@ const CostModal = ({ visible, type, cost, costCategories, onOk, onCancel }) => {
       visible={visible}
       onOk={() => onOk({ name, date, category, price, key: cost && cost.key })}
       onCancel={onCancel}
+      okButtonProps={{ disabled: !(date && date < new Date && price && name && name.length && category) }}
     >
       <p>
         <Select
@@ -48,8 +49,9 @@ const CostModal = ({ visible, type, cost, costCategories, onOk, onCancel }) => {
       <p>
         <Input
           onChange={e => setName(e.target.value)}
-          placeholder={'Text'}
+          placeholder={'Comment'}
           minLength={1}
+          maxLength={25}
           value={name}
         />
       </p>
@@ -69,7 +71,7 @@ const CostModal = ({ visible, type, cost, costCategories, onOk, onCancel }) => {
           format={dateFormat}
         />
       </p>
-    </Modal >
+    </Modal>
   )
 }
 

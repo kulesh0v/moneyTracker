@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment'
-import { Modal, Input, InputNumber, DatePicker, Select } from 'antd';
-
-const { Option } = Select;
+import { Modal, Input, InputNumber, DatePicker } from 'antd';
 
 const ProfitModal = ({ visible, type, profit, onOk, onCancel }) => {
   const dateFormat = 'DD.MM.YYYY';
@@ -14,7 +12,7 @@ const ProfitModal = ({ visible, type, profit, onOk, onCancel }) => {
     if (profit) {
       setName(profit.name);
       setPrice(profit.price);
-      setDate(profit.date);
+      setDate(new Date(profit.date));
     } else {
       setName();
       setPrice(0);
@@ -28,12 +26,14 @@ const ProfitModal = ({ visible, type, profit, onOk, onCancel }) => {
       visible={visible}
       onOk={() => onOk({ name, date, price, key: profit && profit.key })}
       onCancel={onCancel}
+      okButtonProps={{ disabled: !(date && date < new Date && price && name) }}
     >
       <p>
         <Input
           onChange={e => setName(e.target.value)}
-          placeholder={'Text'}
+          placeholder={'Comment'}
           minLength={1}
+          maxLength={25}
           value={name}
         />
       </p>

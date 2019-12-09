@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { Modal, Layout, Button } from 'antd';
 import CostModal from '../components/modals/CostModal.jsx';
 import ProfitModal from '../components/modals/ProfitModal.jsx';
 import CostsList from './CostsList.jsx';
 import ProfitsList from './ProfitsList.jsx';
+import Diagram from './diagram/Diagram.jsx';
+import DiagramSider from './diagram/DiagramSider.jsx';
 import Filter from './filter/Filter.jsx'
 const { ipcRenderer } = window.require('electron');
 const { confirm } = Modal;
@@ -31,21 +33,30 @@ const App = () => {
   const [profitModalVisible, setProfitModalVisible] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [modalKey, setModalKey] = useState(null);
+  const [diagramVisible, setDiagramVisible] = useState(false);
+  const [balance, setBalance] = useState(0);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [dateTo, setDateTo] = useState();
   const [dateFrom, setDateFrom] = useState();
   const [searchText, setSearchText] = useState();
   const [sortType, setSortType] = useState();
-
+  const [diagramDate, setDiagramDate] = useState(new Date());
   useEffect(() => {
     getCosts();
     getProfits();
   }, [selectedCategories, dateTo, dateFrom, searchText, sortType, contentType]);
 
+  useEffect(() => { getCategories() }, []);
+
   useEffect(() => {
-    getCategories();
-  }, []);
+    let total = 0;
+    if (costs && profits) {
+      costs.forEach(cost => total -= cost.price);
+      profits.forEach(profit => total += profit.price);
+    }
+    setBalance(total);
+  }, [costs, profits]);
 
   const addCost = (cost) => {
     closeModal();
@@ -169,6 +180,51 @@ const App = () => {
     },
   });
 
+  const renderSider = () => (
+    <Fragment>
+      <Filter
+        selectedCategories={selectedCategories}
+        selectCategory={selectCategory}
+        categories={categories}
+        setDateFrom={setDateFrom}
+        setDateTo={setDateTo}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        setSearchText={setSearchText}
+        searchText={searchText}
+        contentType={contentType}
+        setContentType={setContentType}
+        contentTypes={contentTypes}
+      />
+      <Button
+        onClick={() => {
+          setCostModalVisible(true);
+          setModalType('add');
+          setModalKey(-1);
+        }}
+        style={{ marginLeft: 12, width: 173 }}
+      >
+        Add cost
+      </Button>
+      <Button
+        onClick={() => {
+          setProfitModalVisible(true);
+          setModalType('add');
+          setModalKey(-1);
+        }}
+        style={{ marginLeft: 12, marginTop: 8, width: 173 }}
+      >
+        Add profit
+      </Button>
+      <Button
+        onClick={() => setDiagramVisible(true)}
+        style={{ marginLeft: 12, marginTop: 8, width: 173 }}
+      >
+        Statisctic
+      </Button>
+    </Fragment>
+  )
+
   if (costs && categories) {
     return (
       <Layout>
@@ -181,40 +237,15 @@ const App = () => {
           onCollapse={setCollapsed}
           style={{ zIndex: 10 }}
         >
-          <Filter
-            selectedCategories={selectedCategories}
-            selectCategory={selectCategory}
-            categories={categories}
-            setDateFrom={setDateFrom}
-            setDateTo={setDateTo}
-            dateFrom={dateFrom}
-            dateTo={dateTo}
-            setSearchText={setSearchText}
-            searchText={searchText}
-            contentType={contentType}
-            setContentType={setContentType}
-            contentTypes={contentTypes}
-          />
-          <Button
-            onClick={() => {
-              setCostModalVisible(true);
-              setModalType('add');
-              setModalKey(-1);
-            }}
-            style={{ marginLeft: 12, width: 173 }}
-          >
-            Add cost
-          </Button>
-          <Button
-            onClick={() => {
-              setProfitModalVisible(true);
-              setModalType('add');
-              setModalKey(-1);
-            }}
-            style={{ marginLeft: 12, marginTop: 8, width: 173 }}
-          >
-            Add profit
-          </Button>
+          {
+            diagramVisible ?
+              <DiagramSider
+                date={diagramDate}
+                setDate={setDiagramDate}
+                closeDiagram={() => setDiagramVisible(false)}
+              /> :
+              renderSider()
+          }
         </Sider>
         <Content>
           {
@@ -238,9 +269,12 @@ const App = () => {
               onOk={modalType === 'edit' ? editProfit : addProfit}
             />
           }
-          {contentType === 'cost' ?
-            <CostsList costs={costs || []} setSortType={setSortType} /> :
-            <ProfitsList profits={profits || []} setSortType={setSortType} />
+          {
+            diagramVisible ?
+              <Diagram month={diagramDate.getMonth()} /> :
+              (contentType === 'cost') ?
+                <CostsList costs={costs || []} setSortType={setSortType} balance={balance} /> :
+                <ProfitsList profits={profits || []} setSortType={setSortType} balance={balance} />
           }
         </Content>
       </Layout >

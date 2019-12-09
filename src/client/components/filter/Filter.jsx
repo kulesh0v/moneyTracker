@@ -28,13 +28,16 @@ const Filter = (props) => {
           setDateFrom={props.setDateFrom}
         />
       </div>
-      <div style={{ marginBottom: 12 }}>
-        <CategoriesList
-          selectedCategories={props.selectedCategories}
-          selectCategory={props.selectCategory}
-          categories={props.categories}
-        />
-      </div>
+      {
+        props.contentType === 'cost' &&
+        <div style={{ marginBottom: 12 }}>
+          <CategoriesList
+            selectedCategories={props.selectedCategories}
+            selectCategory={props.selectCategory}
+            categories={props.categories}
+          />
+        </div>
+      }
     </div>
   )
 };
