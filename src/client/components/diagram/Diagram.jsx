@@ -15,7 +15,7 @@ const Diagram = ({ month }) => {
     if (!data.length) {
       return 'No data';
     }
-    return (
+   return (
       <div style={{ display: 'flex', marginTop: 48 }}>
         <div style={{ margin: 'auto' }}>
           <DonutChart data={data} />

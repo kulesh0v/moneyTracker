@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import { Table, Icon } from 'antd';
+import { Table, Icon, Spin } from 'antd';
 
 const dateFormat = 'DD.MM.YYYY';
 
@@ -48,7 +48,7 @@ const ProfitsList = ({ profits, setSortType, balance }) => {
       render: (value) => `$${value}`,
     },
     {
-      title: '$' + balance,
+      title: balance ? `$${balance}` : <Spin size={'small'} />,
       key: 'actions',
       dataIndex: 'actions',
       render: actions => {

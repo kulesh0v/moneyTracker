@@ -61,6 +61,7 @@ const CostModal = ({ visible, type, cost, costCategories, onOk, onCancel }) => {
           onChange={setPrice}
           value={price}
           min={0}
+          max={10 ** 12}
         />
       </p>
       <p>

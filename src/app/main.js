@@ -57,8 +57,51 @@ ipcMain.handle('getCosts', async (event, filter) => {
   return getCosts(filter);
 });
 
-ipcMain.handle('getCategories', async () => {
+const getCategories = async () => {
   return JSON.parse(await fsPromises.readFile(categoriesPath));
+}
+
+ipcMain.handle('getCategories', async () => {
+  return getCategories();
+});
+
+ipcMain.handle('editCategory', async (event, newCategory) => {
+  try {
+    const categories = await getCategories();
+    const index = categories.findIndex(oldCategory => oldCategory.key === newCategory.key);
+    categories.splice(index, 1, newCategory);
+    await fsPromises.writeFile(categoriesPath, JSON.stringify(categories));
+    return categories;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+});
+
+ipcMain.handle('deleteCategory', async (event, newCategory) => {
+  try {
+    const categories = await getCategories();
+    const index = categories.findIndex(oldCategory => oldCategory.key === newCategory.key);
+    categories.splice(index, 1);
+    await fsPromises.writeFile(categoriesPath, JSON.stringify(categories));
+    return categories;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+});
+
+ipcMain.handle('addCategory', async (event, cost) => {
+  try {
+    const categories = await getCategories();
+    const key = categories[categories.length - 1].key + 1;
+    categories.push({ ...cost, key });
+    await fsPromises.writeFile(categoriesPath, JSON.stringify(categories));
+    return categories;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
 });
 
 ipcMain.handle('addCost', async (event, cost) => {
@@ -195,6 +238,15 @@ ipcMain.handle('getProfits', async (event, filter) => {
   return getProfits(filter);
 });
 
+ipcMain.handle('getBalance', async (event, args) => {
+  const profits = await getProfits();
+  const costs = await getCosts();
+  let res = 0;
+  profits.forEach(p => res += p.price);
+  costs.forEach(c => res -= c.price);
+  return res;
+})
+
 ipcMain.handle('getDiagramDatas', async (event, month) => {
   try {
     const costs = JSON.parse(await fsPromises.readFile(costsPath));
@@ -222,7 +274,7 @@ ipcMain.handle('getDiagramDatas', async (event, month) => {
 
 app.on('ready', () => {
   win = new BrowserWindow({
-    width: 800,
+    width: 1000,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
@@ -230,6 +282,6 @@ app.on('ready', () => {
     },
   });
   Menu.setApplicationMenu(null);
-  // win.webContents.openDevTools();
+  //win.webContents.openDevTools();
   win.loadFile('../client/dist/index.html');
 })

@@ -2,6 +2,7 @@ import React, { useState, useEffect, Fragment } from 'react';
 import { Modal, Layout, Button } from 'antd';
 import CostModal from '../components/modals/CostModal.jsx';
 import ProfitModal from '../components/modals/ProfitModal.jsx';
+import CategoryModal from '../components/modals/CategoryModal.jsx';
 import CostsList from './CostsList.jsx';
 import ProfitsList from './ProfitsList.jsx';
 import Diagram from './diagram/Diagram.jsx';
@@ -31,6 +32,7 @@ const App = () => {
 
   const [costModalVisible, setCostModalVisible] = useState(false);
   const [profitModalVisible, setProfitModalVisible] = useState(false);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [modalKey, setModalKey] = useState(null);
   const [diagramVisible, setDiagramVisible] = useState(false);
@@ -42,6 +44,7 @@ const App = () => {
   const [searchText, setSearchText] = useState();
   const [sortType, setSortType] = useState();
   const [diagramDate, setDiagramDate] = useState(new Date());
+
   useEffect(() => {
     getCosts();
     getProfits();
@@ -50,12 +53,8 @@ const App = () => {
   useEffect(() => { getCategories() }, []);
 
   useEffect(() => {
-    let total = 0;
-    if (costs && profits) {
-      costs.forEach(cost => total -= cost.price);
-      profits.forEach(profit => total += profit.price);
-    }
-    setBalance(total);
+    ipcRenderer.invoke('getBalance')
+      .then(res => setBalance(res));
   }, [costs, profits]);
 
   const addCost = (cost) => {
@@ -70,6 +69,12 @@ const App = () => {
       .then(res => setProfits(addActionsToProfits(res)));
   }
 
+  const addCategory = (category) => {
+    closeModal();
+    ipcRenderer.invoke('addCategory', category)
+      .then(res => setCategories(addActionsToProfits(res)));
+  }
+
   const editCost = (cost) => {
     closeModal();
     ipcRenderer.invoke('editCost', cost)
@@ -82,6 +87,18 @@ const App = () => {
       .then(res => setProfits(addActionsToProfits(res)));
   }
 
+  const editCategory = (category) => {
+    closeModal();
+    ipcRenderer.invoke('editCategory', category)
+      .then(res => setCategories(res));
+  }
+
+  const editCategoryAction = (category) => {
+    setCategoryModalVisible(true);
+    setModalType('edit');
+    setModalKey(category.key);
+  }
+
   const deleteCost = (cost) => {
     closeModal();
     ipcRenderer.invoke('deleteCost', cost)
@@ -92,6 +109,22 @@ const App = () => {
     closeModal();
     ipcRenderer.invoke('deleteProfit', profit)
       .then(res => setProfits(addActionsToProfits(res)));
+  }
+
+  const deleteCategory = (category) => {
+    closeModal();
+    ipcRenderer.invoke('deleteCategory', category)
+      .then(res => setCategories((res)));
+  };
+
+  const deleteCategoryAction = (category) => {
+    confirm({
+      title: 'Are you sure delete this category?',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk: () => deleteCategory(category)
+    });
   }
 
   const selectCategory = (categoryName) => {
@@ -132,6 +165,7 @@ const App = () => {
   const closeModal = () => {
     setCostModalVisible(false);
     setProfitModalVisible(false);
+    setCategoryModalVisible(false);
     setModalKey(null);
     setModalType(null);
   }
@@ -183,6 +217,8 @@ const App = () => {
   const renderSider = () => (
     <Fragment>
       <Filter
+        deleteCategory={deleteCategoryAction}
+        editCategory={editCategoryAction}
         selectedCategories={selectedCategories}
         selectCategory={selectCategory}
         categories={categories}
@@ -215,6 +251,16 @@ const App = () => {
         style={{ marginLeft: 12, marginTop: 8, width: 173 }}
       >
         Add profit
+      </Button>
+      <Button
+        onClick={() => {
+          setCategoryModalVisible(true);
+          setModalType('add');
+          setModalKey(-1);
+        }}
+        style={{ marginLeft: 12, marginTop: 8, width: 173 }}
+      >
+        Add category
       </Button>
       <Button
         onClick={() => setDiagramVisible(true)}
@@ -260,6 +306,16 @@ const App = () => {
             />
           }
           {
+            categoryModalVisible &&
+            <CategoryModal
+              category={categories.find(category => category.key === modalKey)}
+              visible={categoryModalVisible}
+              onCancel={closeModal}
+              type={modalType}
+              onOk={modalType === 'edit' ? editCategory : addCategory}
+            />
+          }
+          {
             profitModalVisible &&
             <ProfitModal
               profit={profits.find(profit => profit.key === modalKey)}
@@ -271,7 +327,7 @@ const App = () => {
           }
           {
             diagramVisible ?
-              <Diagram month={diagramDate.getMonth()} /> :
+              <Diagram month={diagramDate ? diagramDate.getMonth() : (new Date()).getMonth()} /> :
               (contentType === 'cost') ?
                 <CostsList costs={costs || []} setSortType={setSortType} balance={balance} /> :
                 <ProfitsList profits={profits || []} setSortType={setSortType} balance={balance} />

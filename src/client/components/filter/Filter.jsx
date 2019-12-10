@@ -35,6 +35,8 @@ const Filter = (props) => {
             selectedCategories={props.selectedCategories}
             selectCategory={props.selectCategory}
             categories={props.categories}
+            deleteCategory={props.deleteCategory}
+            editCategory={props.editCategory}
           />
         </div>
       }

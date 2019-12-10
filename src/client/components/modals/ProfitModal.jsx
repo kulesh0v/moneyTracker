@@ -43,6 +43,7 @@ const ProfitModal = ({ visible, type, profit, onOk, onCancel }) => {
           onChange={setPrice}
           value={price}
           min={0}
+          max={10 ** 12}
         />
       </p>
       <p>

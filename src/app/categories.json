@@ -1,23 +1,22 @@
 [
   {
+    "key": 1,
     "name": "Food"
   },
   {
+    "key": 2,
     "name": "Clothes"
   },
   {
+    "key": 3,
     "name": "Leisure"
   },
   {
-    "name": "Vape"
-  },
-  {
-    "name": "Alcohol"
-  },
-  {
+    "key": 4,
     "name": "Medicine"
   },
   {
+    "key": 5,
     "name": "Transport"
   }
 ]
