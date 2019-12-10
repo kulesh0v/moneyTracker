@@ -69,6 +69,7 @@ ipcMain.handle('editCategory', async (event, newCategory) => {
   try {
     const categories = await getCategories();
     const index = categories.findIndex(oldCategory => oldCategory.key === newCategory.key);
+    newCategory.name = category.name.trim();
     categories.splice(index, 1, newCategory);
     await fsPromises.writeFile(categoriesPath, JSON.stringify(categories));
     return categories;
@@ -91,11 +92,14 @@ ipcMain.handle('deleteCategory', async (event, newCategory) => {
   }
 });
 
-ipcMain.handle('addCategory', async (event, cost) => {
+ipcMain.handle('addCategory', async (event, category) => {
   try {
     const categories = await getCategories();
     const key = categories[categories.length - 1].key + 1;
-    categories.push({ ...cost, key });
+    category.name = category.name.trim();
+    if (!categories.some(c => c.name === category.name)) {
+      categories.push({ ...category, key });
+    }
     await fsPromises.writeFile(categoriesPath, JSON.stringify(categories));
     return categories;
   } catch (e) {
@@ -104,7 +108,7 @@ ipcMain.handle('addCategory', async (event, cost) => {
   }
 });
 
-ipcMain.handle('addCost', async (event, cost) => {
+ipcMain.handle('addCost', async (event, cost, filter) => {
   try {
     const costsList = await getCosts();
     if (!cost.date) {
@@ -113,14 +117,14 @@ ipcMain.handle('addCost', async (event, cost) => {
     const key = costsList[costsList.length - 1].key + 1;
     costsList.push({ ...cost, key });
     await fsPromises.writeFile(costsPath, JSON.stringify(costsList));
-    return costsList;
+    return getCosts(filter)
   } catch (e) {
     console.log(e);
     return [];
   }
 });
 
-ipcMain.handle('editCost', async (event, cost) => {
+ipcMain.handle('editCost', async (event, cost, filter) => {
   try {
     const costsList = await getCosts();
     if (!cost.date) {
@@ -129,27 +133,27 @@ ipcMain.handle('editCost', async (event, cost) => {
     const index = costsList.findIndex(oldCost => oldCost.key === cost.key);
     costsList.splice(index, 1, cost);
     await fsPromises.writeFile(costsPath, JSON.stringify(costsList));
-    return costsList;
+    return getCosts(filter);
   } catch (e) {
     console.log(e);
     return [];
   }
 });
 
-ipcMain.handle('deleteCost', async (event, cost) => {
+ipcMain.handle('deleteCost', async (event, cost, filter) => {
   try {
     const costsList = JSON.parse(await fsPromises.readFile(costsPath));
     const index = costsList.findIndex(oldCost => oldCost.key === cost.key);
     costsList.splice(index, 1);
     await fsPromises.writeFile(costsPath, JSON.stringify(costsList));
-    return costsList;
+    return getCosts(filter);
   } catch (e) {
     console.log(e);
     return [];
   }
 });
 
-ipcMain.handle('addProfit', async (event, profit) => {
+ipcMain.handle('addProfit', async (event, profit, filter) => {
   try {
     const profitsList = await getProfits();
     if (!profit.date) {
@@ -158,14 +162,14 @@ ipcMain.handle('addProfit', async (event, profit) => {
     const key = profitsList[profitsList.length - 1].key + 1;
     profitsList.push({ ...profit, key });
     await fsPromises.writeFile(profitsPath, JSON.stringify(profitsList));
-    return profitsList;
+    return getProfits(filter);
   } catch (e) {
     console.log(e);
     return [];
   }
 });
 
-ipcMain.handle('editProfit', async (event, profit) => {
+ipcMain.handle('editProfit', async (event, profit, filter) => {
   try {
     const profitsList = await getProfits();
     if (!profit.date) {
@@ -174,20 +178,20 @@ ipcMain.handle('editProfit', async (event, profit) => {
     const index = profitsList.findIndex(oldProfit => oldProfit.key === profit.key);
     profitsList.splice(index, 1, profit);
     await fsPromises.writeFile(profitsPath, JSON.stringify(profitsList));
-    return profitsList;
+    return getProfits(filter);
   } catch (e) {
     console.log(e);
     return [];
   }
 });
 
-ipcMain.handle('deleteProfit', async (event, profit) => {
+ipcMain.handle('deleteProfit', async (event, profit, filter) => {
   try {
     const profitsList = await getProfits();
     const index = profitsList.findIndex(oldProfit => oldProfit.key === profit.key);
     profitsList.splice(index, 1);
     await fsPromises.writeFile(profitsPath, JSON.stringify(profitsList));
-    return profitsList;
+    return getProfits(filter);
   } catch (e) {
     console.log(e);
     return [];
@@ -245,7 +249,7 @@ ipcMain.handle('getBalance', async (event, args) => {
   profits.forEach(p => res += p.price);
   costs.forEach(c => res -= c.price);
   return res;
-})
+});
 
 ipcMain.handle('getDiagramDatas', async (event, month) => {
   try {
@@ -281,7 +285,7 @@ app.on('ready', () => {
       nodeIntegrationInWorker: true,
     },
   });
-  Menu.setApplicationMenu(null);
-  //win.webContents.openDevTools();
+  //Menu.setApplicationMenu(null);
+  win.webContents.openDevTools();
   win.loadFile('../client/dist/index.html');
 })

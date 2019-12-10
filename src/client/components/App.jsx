@@ -59,13 +59,13 @@ const App = () => {
 
   const addCost = (cost) => {
     closeModal();
-    ipcRenderer.invoke('addCost', cost)
+    ipcRenderer.invoke('addCost', cost, { searchText, dateFrom, dateTo, sortType, selectedCategories })
       .then(res => setCosts(addActionsToCosts(res)));
   }
 
   const addProfit = (profit) => {
     closeModal();
-    ipcRenderer.invoke('addProfit', profit)
+    ipcRenderer.invoke('addProfit', profit, { searchText, dateFrom, dateTo, sortType })
       .then(res => setProfits(addActionsToProfits(res)));
   }
 
@@ -77,13 +77,13 @@ const App = () => {
 
   const editCost = (cost) => {
     closeModal();
-    ipcRenderer.invoke('editCost', cost)
+    ipcRenderer.invoke('editCost', cost, { searchText, dateFrom, dateTo, sortType, selectedCategories })
       .then(res => setCosts(addActionsToCosts(res)));
   }
 
   const editProfit = (profit) => {
     closeModal();
-    ipcRenderer.invoke('editProfit', profit)
+    ipcRenderer.invoke('editProfit', profit, { searchText, dateFrom, dateTo, sortType })
       .then(res => setProfits(addActionsToProfits(res)));
   }
 
@@ -101,13 +101,13 @@ const App = () => {
 
   const deleteCost = (cost) => {
     closeModal();
-    ipcRenderer.invoke('deleteCost', cost)
+    ipcRenderer.invoke('deleteCost', cost, { searchText, dateFrom, dateTo, sortType, selectedCategories })
       .then(res => setCosts(addActionsToCosts(res)));
   }
 
   const deleteProfit = (profit) => {
     closeModal();
-    ipcRenderer.invoke('deleteProfit', profit)
+    ipcRenderer.invoke('deleteProfit', profit, { searchText, dateFrom, dateTo, sortType })
       .then(res => setProfits(addActionsToProfits(res)));
   }
 

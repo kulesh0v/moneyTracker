@@ -13,9 +13,6 @@ const CategoriesList = ({ categories, selectCategory, editCategory, deleteCatego
             {category.name}
           </Checkbox>
           <div style={{ marginLeft: 'auto', marginRight: 24 }}>
-            <button className="clear-button" onClick={() => editCategory(category)}>
-              <Icon type="edit" />
-            </button>
             <button className="clear-button" onClick={() => deleteCategory(category)}>
               <Icon type="delete" style={{ marginLeft: 6 }} />
             </button>

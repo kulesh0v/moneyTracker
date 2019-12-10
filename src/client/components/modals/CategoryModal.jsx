@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment'
 import { Modal, Input } from 'antd';
 
 const CostModal = ({ visible, category, type, onOk, onCancel }) => {
@@ -27,7 +26,7 @@ const CostModal = ({ visible, category, type, onOk, onCancel }) => {
           onChange={e => setName(e.target.value)}
           placeholder={'Name'}
           minLength={1}
-          maxLength={25}
+          maxLength={10}
           value={name}
         />
       </p>
