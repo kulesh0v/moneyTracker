@@ -113,6 +113,9 @@ const App = () => {
 
   const deleteCategory = (category) => {
     closeModal();
+    if (selectedCategories.includes(category.name)) {
+      selectCategory(category.name);
+    }
     ipcRenderer.invoke('deleteCategory', category)
       .then(res => setCategories((res)));
   };
