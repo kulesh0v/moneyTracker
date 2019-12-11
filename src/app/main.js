@@ -221,14 +221,24 @@ const getProfits = async (filter) => {
       return true;
     })
     .filter(profit => {
-      if (filter && filter.dateFrom) {
-        return filter.dateFrom < profit.date;
+      if (filter && !!filter.dateFrom) {
+        const dateFrom = new Date(filter.dateFrom);
+        dateFrom.setHours(0);
+        dateFrom.setMinutes(0);
+        dateFrom.setSeconds(0);
+        dateFrom.setMilliseconds(0);
+        return dateFrom <= new Date(profit.date);
       }
       return true;
     })
     .filter(profit => {
       if (filter && filter.dateTo) {
-        return filter.dateTo > profit.date;
+        const dateTo = new Date(filter.dateTo);
+        dateTo.setMinutes(0);
+        dateTo.setSeconds(0);
+        dateTo.setMilliseconds(0);
+        dateTo.setHours(24);
+        return dateTo > new Date(profit.date);
       }
       return true;
     })
