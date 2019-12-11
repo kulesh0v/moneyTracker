@@ -48,7 +48,11 @@ const getCosts = async (filter) => {
           return new Date(cost2.date) - new Date(cost1.date);
         }
       } else {
-        return new Date(cost2.date) - new Date(cost1.date);
+        if (filter) {
+          return new Date(cost2.date) - new Date(cost1.date);
+        } else {
+          return cost1.key - cost2.key;
+        }
       }
     });
 }
@@ -233,7 +237,11 @@ const getProfits = async (filter) => {
           return new Date(profit2.date) - new Date(profit1.date);
         }
       } else {
-        return new Date(profit2.date) - new Date(profit1.date);
+        if (filter) {
+          return new Date(profit2.date) - new Date(profit1.date);
+        } else {
+          return profit1.key - profit2.key;
+        }
       }
     });
 }
@@ -253,14 +261,14 @@ ipcMain.handle('getBalance', async (event, args) => {
 
 ipcMain.handle('getDiagramDatas', async (event, month) => {
   try {
-    const costs = JSON.parse(await fsPromises.readFile(costsPath));
+    let costs = JSON.parse(await fsPromises.readFile(costsPath));
     const result = [];
-    costs.filter(cost => (new Date(cost.date).getMonth()) === month) // FIX: add year filter 
-      .forEach(cost => {
-        if (!result.some(category => category.label === cost.category)) {
-          result.push({ label: cost.category });
-        }
-      });
+    costs = costs.filter(cost => month ? (new Date(cost.date)).getMonth() === month : true);
+    costs.forEach(cost => {
+      if (!result.some(category => category.label === cost.category)) {
+        result.push({ label: cost.category });
+      }
+    });
     return result.map(category => {
       category.value = 0;
       costs.filter(cost => cost.category === category.label)

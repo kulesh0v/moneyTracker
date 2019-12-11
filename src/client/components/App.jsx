@@ -266,7 +266,7 @@ const App = () => {
         onClick={() => setDiagramVisible(true)}
         style={{ marginLeft: 12, marginTop: 8, width: 173 }}
       >
-        Statisctic
+        Statistics
       </Button>
     </Fragment>
   )
@@ -327,7 +327,7 @@ const App = () => {
           }
           {
             diagramVisible ?
-              <Diagram month={diagramDate ? diagramDate.getMonth() : (new Date()).getMonth()} /> :
+              <Diagram month={diagramDate ? diagramDate.getMonth() : undefined} /> :
               (contentType === 'cost') ?
                 <CostsList costs={costs || []} setSortType={setSortType} balance={balance} /> :
                 <ProfitsList profits={profits || []} setSortType={setSortType} balance={balance} />
