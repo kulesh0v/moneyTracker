@@ -5,3 +5,6 @@
 - enter npm install
 - enter npm run build
 - enter npm run start
+
+IntegrationHelper.getEntriesInProgress(response => this.issueService.get(10702))
+.then(response => sendResponse(response.data)
